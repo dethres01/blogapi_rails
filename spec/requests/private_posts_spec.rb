@@ -9,7 +9,7 @@ RSpec.describe "Posts with authentication", type: :request do
   let!(:auth_headers){{'Authorization'=>"Bearer #{user.auth_token}"}}
   let!(:other_auth_headers){{'Authorization'=>"Bearer #{other_user.auth_token}"}}
   let!(:create_params){{"post"=>{"title"=> "title", "content"=>"content","published"=> true}}}
-
+  let!(:update_params){{"post"=>{"title"=>"hola","content"=>"something","published"=>true}}}
   describe "GET /posts/{id}" do
     context "with valid auth" do
       context "when requesting other's author post" do
@@ -59,7 +59,7 @@ RSpec.describe "Posts with authentication", type: :request do
       end
     end
     context "without valid auth" do
-      before {post "/posts/",params: create_params}
+      before {post "/posts",params: create_params}
       context "payload" do
         subject {payload}
         it { is_expected.to include(:error)}
@@ -74,6 +74,35 @@ RSpec.describe "Posts with authentication", type: :request do
   end
     
   describe "PUT /posts" do
+    context "with valid auth" do
+      context "when updating user post" do
+        before {put "/posts/#{user_post.id}",params: update_params,headers: auth_headers}
+        context "payload" do
+          subject {payload}
+          it { is_expected.to include(:id,:title,:content,:published,:author)}
+          it { expect(payload[:id]).to eq(user_post.id)}
+
+        end
+        #response
+        context "response" do
+          subject {response}
+          it {is_expected.to have_http_status(:ok)}  
+        end
+      end
+      context "when updating other user post"do
+        before {put "/posts/#{other_user_post.id}",params: update_params,headers: auth_headers}
+        context "payload" do
+          subject {payload}
+          it { is_expected.to include(:error)}
+
+        end
+        #response
+        context "response" do
+          subject {response}
+          it {is_expected.to have_http_status(:not_found)}  
+        end
+      end
+    end
   end
   private
 

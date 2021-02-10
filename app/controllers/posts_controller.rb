@@ -1,4 +1,5 @@
 class PostsController < ApplicationController
+  before_action :authenticate_user!, only: [:update,:create]
 
   rescue_from Exception do |e|
     render json: {error: e.message}, status: :internal_error
@@ -9,7 +10,10 @@ class PostsController < ApplicationController
   #GET "/posts"
   def index
     @posts = Post.where(published: true)
-    render json: @posts, status: :ok
+    if !params[:search].nil? && params[:search].present?
+      @posts = PostsSearchService.search(@posts, params[:search])
+    end
+    render json: @posts.includes(:user), status: :ok
   end
   #POST "/posts"
   def create
@@ -34,5 +38,10 @@ class PostsController < ApplicationController
   end
   def update_params
     params.require(:post).permit(:title,:content,:published)
+  end
+  def authenticate_user!
+    #leer auth_header
+    #verificar que sea valido
+    #verificar que el token que extraemos corresponda a un usuario
   end
 end

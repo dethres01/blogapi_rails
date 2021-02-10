@@ -8,7 +8,7 @@ RSpec.describe "Posts with authentication", type: :request do
   let!(:other_user_post_draft) {create(:post, user_id: other_user.id,published: false )}
   let!(:auth_headers){{'Authorization'=>"Bearer #{user.auth_token}"}}
   let!(:other_auth_headers){{'Authorization'=>"Bearer #{other_user.auth_token}"}}
-
+  let!(:create_params){{"post"=>{"title"=> "title", "content"=>"content","published"=> true}}}
 
   describe "GET /posts/{id}" do
     context "with valid auth" do
@@ -16,7 +16,7 @@ RSpec.describe "Posts with authentication", type: :request do
         context "when post is public" do
           before {get "/posts/#{other_user_post.id}",headers: auth_headers}
           context "payload" do
-            subject {JSON.parse(response.body)}
+            subject {payload}
             it { is_expected.to include(:id)}
           end
           #response
@@ -29,7 +29,7 @@ RSpec.describe "Posts with authentication", type: :request do
         context "when post is draft" do
           before {get "/posts/#{other_user_post_draft.id}",headers: auth_headers}
           context "payload" do
-            subject {JSON.parse(response.body)}
+            subject {payload}
             it { is_expected.to include(:error)}
           end
           #response
@@ -45,11 +45,41 @@ RSpec.describe "Posts with authentication", type: :request do
   end
   
   describe "POST /posts" do
+    context "with valid auth" do
+      before {post "/posts/",params: create_params,headers: auth_headers}
+      context "payload" do
+        subject {payload}
+        it { is_expected.to include(:id,:title,:content,:published,:author)}
+
+      end
+      #response
+      context "response" do
+        subject {response}
+        it {is_expected.to have_http_status(:created)}  
+      end
+    end
+    context "without valid auth" do
+      before {post "/posts/",params: create_params}
+      context "payload" do
+        subject {payload}
+        it { is_expected.to include(:error)}
+
+      end
+      #response
+      context "response" do
+        subject {response}
+        it {is_expected.to have_http_status(:unauthorized)}  
+      end
+    end
   end
     
   describe "PUT /posts" do
   end
+  private
 
+  def payload
+    JSON.parse(response.body).with_indifferent_access
+  end
 #    it "should return OK" do
  #     get '/posts'
   #    payload = JSON.parse(response.body)

@@ -6,12 +6,11 @@ class JsonWebToken
     JWT.decode(token, nil,
                true, # Verify the signature of this token
                algorithm: 'RS256',
-               iss: 'dev-70535ulx.us.auth0.com',
+               iss: 'https://dev-70535ulx.us.auth0.com/',
                verify_iss: true,
                aud: 'gSJsTA4oFfPmJk9cGY9N5pSewlPQEUxT',
                verify_aud: true) do |header|
       jwks_hash[header['kid']]
-      puts jwks_hash[header['kid']]
     end
   end
 

@@ -1,13 +1,11 @@
 module Secured
   def authenticate_user!
+    
     if(Current.user = user_from_token)
       return
     end
     render json: {error: 'Unauthorized'}, status: :unauthorized
-  rescue JWT::VerificationError, JWT::DecodeError
-    render json: {error: 'Unauthorized'}, status: :unauthorized
   end
-
   def user_from_token
     token = get_token_from_auth_header
     payload = JsonWebToken.verify(token).first.with_indifferent_access
@@ -26,5 +24,5 @@ module Secured
     if headers['Authorization'].present? && headers['Authorization'].match(token_regex)
       headers['Authorization'].match(token_regex)[1]
     end
-  end
+  end 
 end

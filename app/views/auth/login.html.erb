@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Platzi Blog - API</title>
+</head>
+<body>
+  <script src="https://cdn.auth0.com/js/auth0/9.5.1/auth0.min.js"></script>
+  <script>
+    window.addEventListener('load', function() {
+
+      var webAuth = new auth0.WebAuth({
+        domain: 'dev-70535ulx.us.auth0.com',
+        clientID: 'gSJsTA4oFfPmJk9cGY9N5pSewlPQEUxT',
+        responseType: 'token id_token',
+        scope: 'openid profile email',
+        redirectUri: 'https://jwt.io'
+      }); 
+
+      webAuth.authorize();
+    });
+  </script>
+</body>
+</html>

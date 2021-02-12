@@ -1,7 +1,12 @@
 class PostReportJob < ApplicationJob
   queue_as :default
+  #pasar información de preferencia ligera
+  def perform(user_id,post_id)
+    user = User.find(user_id)
+    post = Post.find(post_id)
 
-  def perform(*args)
-    # Do something later
+    report = PostReport.generate(post)
+
+    PostReportMailer.post_report(user, post, report).deliver_now 
   end
 end
